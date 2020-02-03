@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="../../css/bootstrap.min.css"/>
+	</head>
+	<body>
+		<div id="ctx">
+			<button v-perms="'params_add'" class="btn btn-danger">添加</button>
+			<button v-perms="'params_remove'" class="btn btn-danger">删除</button>
+			<button v-perms="'params_update'" class="btn btn-danger">修改</button>
+			<button v-perms="'params_findById'" class="btn btn-danger">查看</button>
+			<table v-if="$perms('params_find')">
+				<tr>
+					<td>编号</td>
+				</tr>
+			</table>
+			<div v-else class="alert alert-danger" role="alert">权限不足</div>
+		</div>
+		<script src="../../js/jquery-1.12.4.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../../js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../../js/vue.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../../js/login.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../../js/perms.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			var vm = new Vue({
+				el:"#ctx",
+				methods:{
+					handlerClick :function(perms){
+						//脚本获取权限对象
+						let p = this.$perms(perms);
+						
+					}
+				}
+			});
+		</script>
+	</body>
+</html>

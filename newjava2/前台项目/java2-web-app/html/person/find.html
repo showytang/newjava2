@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="../../css/bootstrap.min.css"/>
+	</head>
+	<body>
+		<div id="ctx">
+			<ptree :list="perms" :checkedlist="checkedlist"></ptree>
+			<span @click="checkAll">获取全部选中</span>
+		</div>
+		<script src="../../js/jquery-1.12.4.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../../js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../../js/login.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../../js/vue.js" type="text/javascript" charset="utf-8"></script>
+		<script src="../../js/perms.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			var permsTree = Vue.component("ptree", {
+				props: ["list","checkedlist","parent_id"],
+				template: `
+					<ul style="margin-left:20px" class="nav nav-pills nav-stacked">
+						<li class="" v-for='item in list'>
+							<a @click="handlerClick(parent_id,item,$event)" :pid="item.id">
+								<span v-if="checkedlist.some(a=>a==item.id)">+</span>
+								<span v-else>-</span>
+								{{item.name}}
+							</a>
+							<ptree :list = "item.childrens" :parent_id="item.id+','+parent_id" :checkedlist="checkedlist"></ptree>
+						</li>
+					</ul>
+				`,
+				methods: {
+					handlerClick(pid,current_item,event){
+						var id = current_item.id;
+						var flag = this.checkedlist.some(item=>item==id);
+						var parent_pid = [];
+						//判别同级别中有是否在选中中
+						var siblingsFlag = this.list.some(item=>{
+							return this.checkedlist.some(c=>c!=id && c==item.id);
+						});
+						if(!siblingsFlag && pid!=undefined){
+							parent_pid = pid.split(",")
+						}
+						parent_pid.push(id);
+						parent_pid = parent_pid.filter(item=>item!='undefined')
+						if(flag){
+							parent_pid.forEach(p=>{
+								this.checkedlist.forEach((item,index,arr)=>{
+									if(p==item){
+										arr.splice(index,1);
+									}
+								});
+							})
+							this.eachChild(current_item,false);
+						}else{
+							this.checkedlist.push(...parent_pid);
+							this.eachChild(current_item,true);
+						}
+					},
+					eachChild(item,flag){
+						if(!item.childrens){
+							return;
+						}
+						item.childrens.forEach(c=>{
+							if(flag){
+								this.checkedlist.push(c.id);	
+							}else{
+								this.checkedlist.forEach((p,index)=>{
+									if(p==c.id){
+										this.checkedlist.splice(index,1);
+									}
+								})
+							}
+							if(c.childrens){
+								this.eachChild(c,flag);
+							}
+						})
+					}
+				}
+			});
+			var vm = new Vue({
+				el: "#ctx",
+				data() {
+					return {
+						perms: [],
+						checkedlist:[]
+					}
+				},
+				methods: {
+					checkAll(){
+						console.log(this.checkedlist);
+					}
+				},
+				created: function() {
+					var that = this;
+					$.ajax({
+						url: top.data.ip + "perms/find",
+						type: "get",
+						xhrFields: {
+							withCredentials: true
+						},
+						dataType: "json",
+						success: function(response) {
+							that.perms = response;
+						},
+						error: function(error) {
+
+						}
+					});
+				}
+			});
+		</script>
+	</body>
+</html>

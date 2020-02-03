@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+	</head>
+
+	<body>
+		<div id="ctx" class="container">
+			<div class="row">
+				<div class="form-group">
+					<label>用户名：</label>
+					<input v-model="user.username" class="form-control">
+				</div>
+				<div class="form-group">
+					<label>密码：</label>
+					<input v-model="user.password" class="form-control">
+				</div>
+				<button @click="loginin()" class="btn btn-primary">确定</button>
+				<button class="btn btn-danger">取消</button>
+			</div>
+		</div>
+		<script src="js/jquery-1.12.4.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/vue.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/my.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			var vm = new Vue({
+				el: "#ctx",
+				data() {
+					return {
+						user: {}
+					};
+				},
+				methods: {
+					loginin() {
+						var that = this;
+						$.ajax({
+							url: data.ip + "loginin",
+							data: that.user,
+							type: "post",
+							xhrFields: {
+								withCredentials: true
+							},
+							dataType: "json",
+							success: function(response) {
+								if(response && response.token) {
+									//将数据保存在浏览器的session存储对象中.对象转型成字符串
+									sessionStorage.setItem("user",JSON.stringify(response.user));
+									window.location.href = "index.html"
+								}else{
+									alert("用户登录失败。");
+								}
+								
+							}
+						});
+					}
+				}
+			});
+		</script>
+	</body>
+
+</html>

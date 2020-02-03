@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+	<!--
+    	作者：showytang@163.com
+    	时间：2019-12-30
+    	描述：
+    	
+    		1、根据登录者获取菜单
+    -->
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+		<style>
+			iframe{
+				border:0px;
+				width: 100%;
+				height: 100%;
+			}
+			.tab-content>div{
+				height: 100%;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="ctx" style="display: flex;" class="container-fluid">
+			<div class="row" style="flex-grow: 1;display: flex;">
+				<div class="col-md-3">
+					<ptree :list="perms"></ptree>
+				</div>
+				<div class="col-md-9">
+					<ul class="nav nav-tabs my-tab">
+						<li class="active"><a href="#home" data-toggle="tab">首页</a></li>
+					</ul>
+					<div class="tab-content">
+						<div id="home" style="" class="active tab-pane">
+							<iframe src="./html/home.html"></iframe>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="js/jquery-1.12.4.js"></script>
+		<script src="js/vue.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/my.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/login.js" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript">
+			var height = $(window).height();
+			$("#ctx").height(height-2);
+			$(".tab-content").height(height-70)
+			var permsTree = Vue.component("ptree", {
+				props: ["list"],
+				template: `
+					<ul style="margin-left:20px" class="nav nav-pills nav-stacked">
+						<li class="" v-for='item in list' v-if="item.catalog==0">
+							<a v-if="item.path" @click="openHTML(item)">{{item.name}}</a>
+							<a v-else>{{item.name}}</a>
+							<ptree :list = "item.childrens"></ptree>
+						</li>
+					</ul>
+				`,
+				methods: {
+					openHTML(item) {
+						var flag = $(".my-tab>li>a[href='#"+item.ename+"']");
+						$(".my-tab>li").removeClass("active");
+						$(".tab-content>div").removeClass("active");
+						if(flag[0]) {
+							flag.parent().addClass("active");
+							$(".tab-content>div#"+item.ename).addClass("active");
+							return;
+						};
+						let nav_li = `<li class="active"><a href="#${item.ename}" data-toggle="tab">${item.name}</a></li>`;
+						let tab_div = `<div id="${item.ename}" class="active tab-pane">
+										<iframe src="./html/${item.path}"></iframe>
+									</div>`;
+						$(".my-tab").append(nav_li);
+						$(".tab-content").append(tab_div);
+					}
+				}
+			});
+			var vm = new Vue({
+				el: "#ctx",
+				data() {
+					return {
+						perms: []
+					}
+				},
+				methods: {
+
+				},
+				created: function() {
+					var that = this;
+					$.ajax({
+						url: data.ip + "perms/find",
+						type: "get",
+						xhrFields: {
+							withCredentials: true
+						},
+						dataType: "json",
+						success: function(response) {
+							that.perms = response;
+						},
+						error: function(error) {
+
+						}
+					});
+				}
+			});
+		</script>
+	</body>
+
+</html>
